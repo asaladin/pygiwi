@@ -29,4 +29,7 @@ def view_wiki(request):
 
     html = renderers[ext](content) #selection of the correct renderer from the file extension
     
-    return {"wikis": ["un", "deux"], "content": html}
+    #create list of wikis:
+    wikis = os.listdir(wikiroot)
+        
+    return {"wikis": wikis, "content": html}
