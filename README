@@ -1,0 +1,7 @@
+About
+======
+
+**NOT READY FOR PRODUCTION**
+
+This is (well, may one day be) yet another wiki engine, using git as a backend.
+For now it's capable of rendering pages in Creole or Markdown format, from bitbucket's wiki repositories.
