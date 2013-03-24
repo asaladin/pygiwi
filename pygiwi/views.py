@@ -6,15 +6,12 @@ import glob
 import os
 import os.path
 
-@view_config(route_name='home', renderer='templates/mytemplate.pt')
-def my_view(request):
-    return {'project': 'pygiwi'}
 
-#this view returns the wiki page content
-@view_config(route_name="view_wiki", renderer="pygiwi:templates/wiki.mako")
-def view_wiki(request):
-    pagename = request.matchdict["page"]
-    project = request.matchdict["project"]
+def getPageContent(request, project, pagename):
+    """
+    this function takes the request object (for configuration values in registry), the project name and the pagename and  
+    returns the corresponding file content
+    """
     
     #construction of the wiki path
     wikiroot = request.registry.settings['wiki.root']  #from settings in .ini file.
@@ -26,10 +23,39 @@ def view_wiki(request):
 
     ext = os.path.splitext(f)[1]
     content = open(f, "r").read()
+    
+    return content
+    
+    
+@view_config(route_name='home', renderer='templates/mytemplate.pt')
+def my_view(request):
+    return {'project': 'pygiwi'}
+    
 
+@view_config(route_name="view_wiki", renderer="pygiwi:templates/wiki.mako")
+def view_wiki(request):
+    """this view returns the wiki page content
+    """
+    pagename = request.matchdict["page"]
+    project = request.matchdict["project"]
+    
+    content = getPageContent(request, project, pagename)
     html = renderers[ext](content) #selection of the correct renderer from the file extension
     
     #create list of wikis:
     wikis = os.listdir(wikiroot)
         
     return {"wikis": wikis, "content": html}
+    
+@view_config(route_name = "edit", renderer = "pygiwi:editpage.mako")
+def edit_wiki(request):
+    """this view displays the raw content of the edited file for editing
+    """    
+    project = request.matchdict["project"]
+    page = request.matchdict["page"]
+    
+    content = getPageContent(request, project, page)
+    
+    return {"project": project, "content": content}
+    
+    
