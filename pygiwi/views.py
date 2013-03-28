@@ -7,7 +7,7 @@ import os
 import os.path
 
 
-def getPageContent(request, project, pagename):
+def getPage(request, project, pagename):
     """
     this function takes the request object (for configuration values in registry), the project name and the pagename and  
     returns the corresponding file content
@@ -24,7 +24,7 @@ def getPageContent(request, project, pagename):
     ext = os.path.splitext(f)[1]
     content = open(f, "r").read()
     
-    return content
+    return content, ext
     
     
 @view_config(route_name='home', renderer='templates/mytemplate.pt')
@@ -39,10 +39,11 @@ def view_wiki(request):
     pagename = request.matchdict["page"]
     project = request.matchdict["project"]
     
-    content = getPageContent(request, project, pagename)
-    html = renderers[ext](content) #selection of the correct renderer from the file extension
+    content, ext = getPage(request, project, pagename)
+    html = renderers[ext](content)
     
     #create list of wikis:
+    wikiroot = request.registry.settings['wiki.root']  #from settings in .ini file.
     wikis = os.listdir(wikiroot)
         
     return {"wikis": wikis, "content": html}
@@ -54,7 +55,7 @@ def edit_wiki(request):
     project = request.matchdict["project"]
     page = request.matchdict["page"]
     
-    content = getPageContent(request, project, page)
+    content,ext = getPage(request, project, page)
     
     return {"project": project, "content": content}
     

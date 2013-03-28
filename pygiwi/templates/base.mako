@@ -5,10 +5,14 @@
 </head>
 <body>
 
+<div id="wikilist">
 available wikis: 
+<ul>
 %for  w in wikis:
-${w}
+<li>${w}</li>
 %endfor
+</ul>
+</div>
 
 ${next.body()}
 
