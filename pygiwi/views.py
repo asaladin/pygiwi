@@ -40,7 +40,8 @@ def view_wiki(request):
     project = request.matchdict["project"]
     
     content, ext = getPage(request, project, pagename)
-    html = renderers[ext](content)
+    
+    html = renderers[ext](unicode(content, 'utf-8'))
     
     #create list of wikis:
     wikiroot = request.registry.settings['wiki.root']  #from settings in .ini file.
