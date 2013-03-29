@@ -1,6 +1,8 @@
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 
+from dulwich.repo import Repo
+
 from lib import renderers, formats
 
 import glob
@@ -24,7 +26,7 @@ def getPage(request, project, pagename):
 
     ext = os.path.splitext(f)[1]
     content = open(f, "r").read()
-    
+        
     return content, ext
     
     
@@ -71,16 +73,55 @@ def view_wiki(request):
     wikis = os.listdir(wikiroot)
         
     return {"wikis": wikis, "content": html, "format": formats[ext]}
+
     
-@view_config(route_name = "edit", renderer = "pygiwi:editpage.mako")
+    
+def do_commit(request, content):
+    project = request.matchdict['project']
+    page = request.matchdict['page']
+    
+    #construction of the wiki path
+    wikiroot = request.registry.settings['wiki.root']  #from settings in .ini file.
+    wikipath = os.path.join(wikiroot, project) #project name is the name of the git repository
+    rootfilepath = os.path.join(wikipath, page) #we want one specific file into this directory
+    
+    files = glob.glob(rootfilepath+".*")  #list files with any extension
+    f = files[0]   #we take the first matching file, undertermined results if two files only differs by extension
+
+    handle = open(f, "w")
+    handle.write(content.encode('utf-8'))
+    handle.close()
+    
+    repo = Repo(wikipath)
+    strfilename = str(os.path.split(f)[1])
+    
+    repo.stage([strfilename])
+    
+    repo.do_commit("edited online with pygiwi", committer="John Doe <john@doe.void>")
+    
+    
+    
+@view_config(route_name = "edit", renderer = "pygiwi:templates/editpage.mako")
 def edit_wiki(request):
     """this view displays the raw content of the edited file for editing
-    """    
+    """ 
+    
     project = request.matchdict["project"]
     page = request.matchdict["page"]
     
-    content,ext = getPage(request, project, page)
+    if "content" in request.POST:
+        do_commit(request, request.POST['content'])
+        return HTTPFound(request.route_path('view_wiki', project=project, page=page)  )
+        
+            
+        
+    #create list of wikis:
+    wikiroot = request.registry.settings['wiki.root']  #from settings in .ini file.
+    wikis = os.listdir(wikiroot)
     
-    return {"project": project, "content": content}
+    content,ext = getPage(request, project, page)
+    content = unicode(content, 'utf-8')
+    
+    return {"wikis": wikis, "project": project, "content": content}
     
     
