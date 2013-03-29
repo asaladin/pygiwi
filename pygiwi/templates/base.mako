@@ -9,7 +9,7 @@
 available wikis: 
 <ul>
 %for  w in wikis:
-<li>${w}</li>
+<li><a href="${request.route_path('view_wiki', project=w, page='Home') }">${w}</a></li>
 %endfor
 </ul>
 </div>
