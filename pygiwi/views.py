@@ -1,7 +1,7 @@
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 
-from lib import renderers
+from lib import renderers, formats
 
 import glob
 import os
@@ -70,7 +70,7 @@ def view_wiki(request):
     wikiroot = request.registry.settings['wiki.root']  #from settings in .ini file.
     wikis = os.listdir(wikiroot)
         
-    return {"wikis": wikis, "content": html}
+    return {"wikis": wikis, "content": html, "format": formats[ext]}
     
 @view_config(route_name = "edit", renderer = "pygiwi:editpage.mako")
 def edit_wiki(request):

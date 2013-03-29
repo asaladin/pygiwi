@@ -12,9 +12,12 @@ def creole_renderer(text):
     return creole2html(unicode(text))
 
 #dict to select the correct renderer:
-
 renderers = {
               ".md": markdown_renderer,
               ".wiki": creole_renderer,
              }
 
+formats = {
+           ".md": "markdown",
+           ".wiki": "creole",
+          }

@@ -8,9 +8,19 @@
        padding-right:5px;
        border: 1px dotted grey;
        margin: 0 15px 0 13px;
-    }
+       }
+       
+#format {
+          background-color: #f3f3f3;
+        }
+       
+    
 
 </style>
+
+<div id="format-desc">
+This wiki is in <span id="format">${format}</span>
+</div>
 
 <div id="wiki-content">
 ${content|n}
