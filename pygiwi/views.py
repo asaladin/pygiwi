@@ -1,4 +1,5 @@
 from pyramid.view import view_config
+from pyramid.httpexceptions import HTTPFound
 
 from lib import renderers
 
@@ -32,6 +33,15 @@ def my_view(request):
     return {'project': 'pygiwi'}
 
     
+@view_config(route_name="wiki_project_home")
+def wiki_project_home(request):
+    """this view is called with urls like /wiki/project_name without page name. It should redirect to the 'home' page,
+       ie Home"""
+    project_name = request.matchdict['project']
+    return HTTPFound(request.route_url('view_wiki', project=project_name, page='Home'))
+    
+
+@view_config(route_name='wiki_home2', renderer='pygiwi:templates/wiki_home.mako')    
 @view_config(route_name='wiki_home', renderer='pygiwi:templates/wiki_home.mako')
 def wiki_home(request):
     #create list of wikis:
@@ -48,6 +58,9 @@ def view_wiki(request):
     """
     pagename = request.matchdict["page"]
     project = request.matchdict["project"]
+    
+    if pagename=='':
+        return HTTPFound(request.route_url('view_wiki', project=project, page='Home'))
     
     content, ext = getPage(request, project, pagename)
     
