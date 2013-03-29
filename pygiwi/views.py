@@ -30,6 +30,16 @@ def getPage(request, project, pagename):
 @view_config(route_name='home', renderer='templates/mytemplate.pt')
 def my_view(request):
     return {'project': 'pygiwi'}
+
+    
+@view_config(route_name='wiki_home', renderer='pygiwi:templates/wiki_home.mako')
+def wiki_home(request):
+    #create list of wikis:
+    wikiroot = request.registry.settings['wiki.root']  #from settings in .ini file.
+    wikis = os.listdir(wikiroot)
+    
+    return {'wikis': wikis}
+    
     
 
 @view_config(route_name="view_wiki", renderer="pygiwi:templates/wiki.mako")
