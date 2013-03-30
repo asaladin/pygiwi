@@ -26,6 +26,6 @@ formats = {
           
 def get_user_infos(request):
     userid = authenticated_userid(request)
-    print userid
-    
-    return {'name': 'John Doe', 'email': 'john@doe.void'}
+        
+    return {'name': 'Online User', 'email': userid}
+
