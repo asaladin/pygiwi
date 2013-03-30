@@ -3,7 +3,7 @@ from pyramid.httpexceptions import HTTPFound
 
 from dulwich.repo import Repo
 
-from lib import renderers, formats
+from lib import renderers, formats, get_user_infos
 
 import glob
 import os
@@ -97,7 +97,9 @@ def do_commit(request, content):
     
     repo.stage([strfilename])
     
-    repo.do_commit("edited online with pygiwi", committer="John Doe <john@doe.void>")
+    userinfos = get_user_infos(request)
+    
+    repo.do_commit("edited online with pygiwi", committer="%(name)s <%(email)s>"%userinfos)
     
     
     

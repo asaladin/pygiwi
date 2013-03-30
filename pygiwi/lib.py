@@ -1,3 +1,4 @@
+from pyramid.security import authenticated_userid
 
 from markdown import markdown
 from creole import creole2html
@@ -21,3 +22,9 @@ formats = {
            ".md": "markdown",
            ".wiki": "creole",
           }
+
+          
+def get_user_infos(request):
+    userid = authenticated_userid(request)
+    
+    return {'name': 'John Doe', 'email': 'john@doe.void'}
