@@ -1,5 +1,6 @@
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
+from pyramid.security import authenticated_userid
 
 from dulwich.repo import Repo
 
@@ -54,7 +55,7 @@ def wiki_home(request):
     
     
 
-@view_config(route_name="view_wiki", renderer="pygiwi:templates/wiki.mako")
+@view_config(route_name="view_wiki", renderer="pygiwi:templates/wiki.mako", permission="view")
 def view_wiki(request):
     """this view returns the wiki page content
     """
@@ -103,7 +104,7 @@ def do_commit(request, content):
     
     
     
-@view_config(route_name = "edit", renderer = "pygiwi:templates/editpage.mako")
+@view_config(route_name = "edit", renderer = "pygiwi:templates/editpage.mako", permission="edit")
 def edit_wiki(request):
     """this view displays the raw content of the edited file for editing
     """ 

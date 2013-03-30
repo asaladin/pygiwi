@@ -11,6 +11,7 @@ requires = [
     'pyramid_debugtoolbar',
     'waitress',
     'dulwich',
+    'pyramid_persona',
     ]
 
 setup(name='pygiwi',
