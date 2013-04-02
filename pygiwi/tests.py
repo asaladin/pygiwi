@@ -41,7 +41,7 @@ class ViewTests(unittest.TestCase):
         projectname = os.path.split(self.tmpdir)[1]
         request.registry.settings['wiki.root'] = root
         request.matchdict['page'] = "Home"
-        request.matchdict['project'] = projectnamegit
+        request.matchdict['project'] = projectname
                 
         page = view_wiki(request)
         self.assertIn("hello", page['content'])
