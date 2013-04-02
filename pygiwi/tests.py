@@ -33,14 +33,15 @@ class ViewTests(unittest.TestCase):
         repo = Repo.init(self.tmpdir)
         
         #populate with a new home page:
-        with open("/tmp/testwiki/Home.md", "w") as f:
+        with open("%s/%s"%(self.tmpdir, "Home.md"), "w") as f:
            f.write("hello wiki")
                 
         request = testing.DummyRequest()
         root = os.path.split(self.tmpdir)[0]
+        projectname = os.path.split(self.tmpdir)[1]
         request.registry.settings['wiki.root'] = root
         request.matchdict['page'] = "Home"
-        request.matchdict['project'] = "testwiki"
+        request.matchdict['project'] = projectnamegit
                 
         page = view_wiki(request)
         self.assertIn("hello", page['content'])
