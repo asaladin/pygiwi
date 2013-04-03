@@ -15,19 +15,24 @@ class ViewTests(unittest.TestCase):
         
         #create an empty repository
         self.tmpdir = tempfile.mkdtemp()
-        repo = Repo.init(self.tmpdir)
+        self.repo = Repo.init(self.tmpdir)
         
         #populate with a new home page:
         with open("%s/%s"%(self.tmpdir, "Home.md"), "w") as f:
            f.write("hello wiki")   
+           
+        #add this new page to the revision history:
+        self.repo.stage(["Home.md"])
+        self.repo.do_commit("first revision", committer="john doe <john@doe.void>")
+        
                 
         request = testing.DummyRequest()
-        root = os.path.split(self.tmpdir)[0]
-        projectname = os.path.split(self.tmpdir)[1]
+        self.root = os.path.split(self.tmpdir)[0]
+        self.projectname = os.path.split(self.tmpdir)[1]
         
-        request.registry.settings['wiki.root'] = root
+        request.registry.settings['wiki.root'] = self.root
         request.matchdict['page'] = "Home"
-        request.matchdict['project'] = projectname
+        request.matchdict['project'] = self.projectname
         
         self.request = request
         
@@ -59,8 +64,31 @@ class ViewTests(unittest.TestCase):
         self.config.testing_securitypolicy(userid='john@doe.void',
                                            permissive=True)
         
+        #get the last commit:
+        last_commit_id = self.repo.revision_history(self.repo.head())[0].id
+        
         self.request.POST['content'] = "wiki2"
-        p = edit_wiki(self.request)
         
-        print p
+        #call the edit_wiki view to modify the home page
+        p = edit_wiki(self.request)    
         
+        #check for desired side effects
+        #for example there should be a new commit        
+        new_commit = self.repo.revision_history(self.repo.head())[0]
+        self.assertNotEqual(last_commit_id, new_commit.id)
+        self.assertEqual(last_commit_id, new_commit.parents[0])
+        
+        #check that the "Home.md" file was actually modified:
+        home_md = open("%s/%s"%(self.tmpdir, "Home.md"), "r")
+        self.assertIn("wiki2", home_md.read())
+        
+    def test_wiki_home(self):
+        """test the wiki_home view that basically lists all available wikis"""
+        from .views import wiki_home
+        
+        #create a new empty request:
+        request = testing.DummyRequest()
+        request.registry.settings['wiki.root'] = self.root
+        
+        wh = wiki_home(self.request)
+        self.assertIn(self.projectname, wh["wikis"])
