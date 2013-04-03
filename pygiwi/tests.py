@@ -81,7 +81,23 @@ class ViewTests(unittest.TestCase):
         #check that the "Home.md" file was actually modified:
         home_md = open("%s/%s"%(self.tmpdir, "Home.md"), "r")
         self.assertIn("wiki2", home_md.read())
+    
+    def test_edit_wiki_noUpdate(self):
+        """test the edit wiki view but with a "get" request, ie no modification performed, just
+        display the editor"""
         
+        from .views import edit_wiki, view_wiki
+        self.config.testing_securitypolicy(userid='john@doe.void',
+                                           permissive=True)
+        
+        p = edit_wiki(self.request)
+        self.assertIn(self.projectname, p['wikis'])
+        self.assertEqual(self.projectname, p['project'])
+        
+        
+    
+    
+    
     def test_wiki_home(self):
         """test the wiki_home view that basically lists all available wikis"""
         from .views import wiki_home
