@@ -1,10 +1,13 @@
 from pyramid.view import view_config
-from pyramid.httpexceptions import HTTPFound
+from pyramid.view import notfound_view_config
+from pyramid.response import Response
+from pyramid.httpexceptions import HTTPFound, HTTPNotFound
 from pyramid.security import authenticated_userid
 
 from dulwich.repo import Repo
 
 from lib import renderers, formats, get_user_infos
+from lib import mkdir_p
 
 import glob
 import os
@@ -65,7 +68,16 @@ def view_wiki(request):
     if pagename=='':
         return HTTPFound(request.route_url('view_wiki', project=project, page='Home'))
     
-    content, ext = getPage(request, project, pagename)
+    try:
+        content, ext = getPage(request, project, pagename)
+    except:
+        mydict = dict(pagename = pagename, url="/createwiki/%s/%s"%(project, pagename) )
+        class Litteral:
+            def __init__(self, s):
+                self.s = s
+            def __html__(self):
+                return self.s
+        return HTTPNotFound(Litteral("The page %(pagename)s cannot be found, maybe you want to <a href='%(url)s'>create a new one</a>"%mydict) )
     
     html = renderers[ext](unicode(content, 'utf-8'))
     
@@ -75,7 +87,7 @@ def view_wiki(request):
         
     return {"wikis": wikis, "content": html, "format": formats[ext]}
 
-    
+
     
 def do_commit(request, content):
     project = request.matchdict['project']
@@ -126,5 +138,23 @@ def edit_wiki(request):
     content = unicode(content, 'utf-8')
     
     return {"wikis": wikis, "project": project, "content": content}
+
+@view_config(route_name="createwiki", permission="edit")
+def create_wiki(request):
     
+    project = request.matchdict['project']
+    page = request.matchdict['page']
+    wikiroot = request.registry.settings['wiki.root']
     
+    #determine the new page path:
+    rootpath = os.path.join(wikiroot, project)
+    filepath = os.path.join(rootpath,page)
+    filepath += ".md"  #TODO: markdown only for the moment
+    
+    #create the new page, and parent directories if needed
+    mkdir_p(rootpath)
+    f = open(filepath, "w")
+    f.write("please set some content here")
+    f.close()
+    
+    return HTTPFound(request.route_path("edit", project=project, page=page))
