@@ -72,12 +72,7 @@ def view_wiki(request):
         content, ext = getPage(request, project, pagename)
     except:
         mydict = dict(pagename = pagename, url="/createwiki/%s/%s"%(project, pagename) )
-        class Litteral:
-            def __init__(self, s):
-                self.s = s
-            def __html__(self):
-                return self.s
-        return HTTPNotFound(Litteral("The page %(pagename)s cannot be found, maybe you want to <a href='%(url)s'>create a new one</a>"%mydict) )
+        raise HTTPNotFound()
     
     html = renderers[ext](unicode(content, 'utf-8'))
     
@@ -139,6 +134,18 @@ def edit_wiki(request):
     
     return {"wikis": wikis, "project": project, "content": content}
 
+    
+@notfound_view_config(route_name="view_wiki")
+def wiki_not_found_view(exc, request):
+    
+    pagename = request.matchdict["page"]
+    project = request.matchdict["project"]       
+           
+    mydict = dict(pagename = pagename, url="/createwiki/%s/%s"%(project, pagename) )
+    response = "The page %(pagename)s cannot be found, maybe you want to <a href='%(url)s'>create a new one</a>"%mydict 
+    return Response(response)
+    
+    
 @view_config(route_name="createwiki", permission="edit")
 def create_wiki(request):
     
