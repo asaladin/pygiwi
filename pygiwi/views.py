@@ -7,11 +7,14 @@ from pyramid.security import authenticated_userid
 from dulwich.repo import Repo
 
 from lib import renderers, formats, get_user_infos
-from lib import mkdir_p
+from lib import mkdir_p, custom_route_path
 
 import glob
 import os
 import os.path
+
+import logging
+log = logging.getLogger(__name__)
 
 
 def getPage(request, project, pagename):
@@ -121,7 +124,7 @@ def edit_wiki(request):
     
     if "content" in request.POST:
         do_commit(request, request.POST['content'])
-        return HTTPFound(request.route_path('view_wiki', project=project, page=page)  )
+        return HTTPFound(custom_route_path(request, 'view_wiki', project=project, page=page)  )
         
             
         
@@ -159,9 +162,15 @@ def create_wiki(request):
     filepath += ".md"  #TODO: markdown only for the moment
     
     #create the new page, and parent directories if needed
-    mkdir_p(rootpath)
+    
+    if "/" in page:
+        dirname = os.path.split(page)[0]
+        dirpath = os.path.join(rootpath, dirname)
+        log.debug("creating directory %s"%dirpath)
+        mkdir_p(dirpath)
+        
     f = open(filepath, "w")
     f.write("please set some content here")
     f.close()
     
-    return HTTPFound(request.route_path("edit", project=project, page=page))
+    return HTTPFound(custom_route_path(request, "edit", project=project, page=page))

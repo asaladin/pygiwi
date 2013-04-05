@@ -5,6 +5,8 @@ from creole import creole2html
 
 import os, errno #for mkdir_p
 
+import urllib
+
 #renderers:
 
 def markdown_renderer(text):
@@ -39,4 +41,8 @@ def mkdir_p(path):
         if exc.errno == errno.EEXIST and os.path.isdir(path):
             pass
         else: raise
+
+def custom_route_path(request, route_name, **kw):
+    route = request.route_path(route_name, **kw)
+    return urllib.unquote(route)
     
