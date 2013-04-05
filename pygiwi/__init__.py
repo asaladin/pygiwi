@@ -21,6 +21,8 @@ def main(global_config, **settings):
     config.add_route('wiki_project_home', '/wiki/{project}')
     
     config.add_route("edit", "/edit/{project}/{page:.*}")
+    config.add_route("createwiki", "/createwiki/{project}/{page:.*}")
+    
     
     config.scan()
     return config.make_wsgi_app()

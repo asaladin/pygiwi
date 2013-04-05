@@ -3,6 +3,9 @@ from pyramid.security import authenticated_userid
 from markdown import markdown
 from creole import creole2html
 
+import os, errno #for mkdir_p
+
+import urllib
 
 #renderers:
 
@@ -29,3 +32,17 @@ def get_user_infos(request):
         
     return {'name': 'Online User', 'email': userid}
 
+    
+
+def mkdir_p(path):
+    try:
+        os.makedirs(path)
+    except OSError as exc: # Python >2.5
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else: raise
+
+def custom_route_path(request, route_name, **kw):
+    route = request.route_path(route_name, **kw)
+    return urllib.unquote(route)
+    

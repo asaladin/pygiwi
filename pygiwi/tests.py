@@ -82,6 +82,12 @@ class ViewTests(unittest.TestCase):
         home_md = open("%s/%s"%(self.tmpdir, "Home.md"), "r")
         self.assertIn("wiki2", home_md.read())
     
+    def test_edit_wiki_subdirectory(self):
+        """ test with a page in a subdir"""
+        #TODO: writeme
+        self.assertTrue(False)
+    
+    
     def test_edit_wiki_noUpdate(self):
         """test the edit wiki view but with a "get" request, ie no modification performed, just
         display the editor"""
@@ -94,8 +100,6 @@ class ViewTests(unittest.TestCase):
         self.assertIn(self.projectname, p['wikis'])
         self.assertEqual(self.projectname, p['project'])
         
-        
-    
     
     
     def test_wiki_home(self):
