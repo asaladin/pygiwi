@@ -22,6 +22,8 @@
 This wiki is in <span id="format">${format}</span>
 </div>
 
+<a id="edit" href="${edit_url}">edit</a>
+
 <div id="wiki-content">
 ${content|n}
 </div>

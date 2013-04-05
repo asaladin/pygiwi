@@ -82,8 +82,10 @@ def view_wiki(request):
     #create list of wikis:
     wikiroot = request.registry.settings['wiki.root']  #from settings in .ini file.
     wikis = os.listdir(wikiroot)
+    
+    edit_url = custom_route_path(request, "edit", project=project, page=pagename)
         
-    return {"wikis": wikis, "content": html, "format": formats[ext]}
+    return {"wikis": wikis, "content": html, "format": formats[ext], "edit_url": edit_url}
 
 
     
