@@ -6,12 +6,14 @@ import tempfile
 import os
 import shutil
 
+from lib import mkdir_p
 
 class ViewTests(unittest.TestCase):
     def setUp(self):
         self.config = testing.setUp()
         
-        self.config.add_route('view_wiki', '"/wiki/{project}/{page:.*}')
+        self.config.add_route('view_wiki', '/wiki/{project}/{page:.*}')
+        self.config.add_route('edit', "/edit/{project}/{page:.*}")
         
         #create an empty repository
         self.tmpdir = tempfile.mkdtemp()
@@ -20,7 +22,13 @@ class ViewTests(unittest.TestCase):
         #populate with a new home page:
         with open("%s/%s"%(self.tmpdir, "Home.md"), "w") as f:
            f.write("hello wiki")   
-           
+        
+        #create a page in a subdirectory as well
+        mkdir_p("%s/%s"%(self.tmpdir, "testsubdir"))
+        home_md = open("%s/%s"%(self.tmpdir, "testsubdir/subdirfile.md"), "w")
+        home_md.write("hello subdir file")
+        
+        
         #add this new page to the revision history:
         self.repo.stage(["Home.md"])
         self.repo.do_commit("first revision", committer="john doe <john@doe.void>")
@@ -85,7 +93,38 @@ class ViewTests(unittest.TestCase):
     def test_edit_wiki_subdirectory(self):
         """ test with a page in a subdir"""
         #TODO: writeme
-        self.assertTrue(False)
+        
+        from .views import edit_wiki, view_wiki
+        self.config.testing_securitypolicy(userid='john@doe.void',
+                                           permissive=True)
+        
+        #get the last commit:
+        last_commit_id = self.repo.revision_history(self.repo.head())[0].id
+        
+        self.request.POST['content'] = "subdir2"
+        
+        self.request.matchdict['page'] = "testsubdir/subdirfile.md"
+        self.request.matchdict['project'] = self.projectname
+                        
+
+        #create the subdir file:
+        from .views import create_wiki
+        create_wiki(self.request)
+                        
+        #call the edit_wiki view to modify the home page
+        p = edit_wiki(self.request)    
+        
+        #check for desired side effects
+        #for example there should be a new commit        
+        new_commit = self.repo.revision_history(self.repo.head())[0]
+        self.assertNotEqual(last_commit_id, new_commit.id)
+        self.assertEqual(last_commit_id, new_commit.parents[0])
+        
+        #check that the "Home.md" file was actually modified:
+        home_md = open("%s/%s"%(self.tmpdir, "testsubdir/subdirfile.md"), "r")
+        self.assertIn("subdir2", home_md.read())
+        
+        
     
     
     def test_edit_wiki_noUpdate(self):
