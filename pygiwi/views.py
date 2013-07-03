@@ -59,7 +59,7 @@ def wiki_home(request):
     
     return {'wikis': wikis}
     
-    
+   
 
 @view_config(route_name="view_wiki", renderer="pygiwi:templates/wiki.mako", permission="view")
 def view_wiki(request):
@@ -140,18 +140,20 @@ def edit_wiki(request):
     return {"wikis": wikis, "project": project, "content": content}
 
     
-@notfound_view_config(route_name="view_wiki")
+@notfound_view_config(route_name="view_wiki", renderer="pygiwi:templates/wikipagenotfound.mako")
 def wiki_not_found_view(exc, request):
     
     pagename = request.matchdict["page"]
     project = request.matchdict["project"]       
            
-    mydict = dict(pagename = pagename, url="/createwiki/%s/%s"%(project, pagename) )
-    response = "The page %(pagename)s cannot be found, maybe you want to <a href='%(url)s'>create a new one</a>"%mydict 
-    return Response(response)
+    mydict = dict(pagename = pagename, url=request.route_path('createpage', project=project, page=pagename))
+    
+    request.response.status = 404    
+    
+    return mydict
     
     
-@view_config(route_name="createwiki", permission="edit")
+@view_config(route_name="createpage", permission="edit")
 def create_wiki(request):
     
     project = request.matchdict['project']

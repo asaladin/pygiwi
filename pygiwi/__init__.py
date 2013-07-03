@@ -1,6 +1,10 @@
 from pyramid.config import Configurator
 from pyramid.httpexceptions import HTTPFound
 
+from pyramid.events import subscriber
+from pyramid.events import NewRequest
+
+from pyramid.security import authenticated_userid
 
 def main(global_config, **settings):
     """ This function returns a Pyramid WSGI application.
@@ -21,8 +25,13 @@ def main(global_config, **settings):
     config.add_route('wiki_project_home', '/wiki/{project}')
     
     config.add_route("edit", "/edit/{project}/{page:.*}")
-    config.add_route("createwiki", "/createwiki/{project}/{page:.*}")
+    config.add_route("createpage", "/createpage/{project}/{page:.*}")
     
     
     config.scan()
     return config.make_wsgi_app()
+
+    
+@subscriber(NewRequest)
+def mysubscriber(event):
+    event.request.user = authenticated_userid(event.request)

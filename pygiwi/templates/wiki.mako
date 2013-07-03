@@ -13,16 +13,19 @@
 #format {
           background-color: #f3f3f3;
         }
-       
-    
 
 </style>
+
+
+<a href=${request.route_url('wiki_home')}>wiki list</a> <br /> <br />
+
+
 
 <div id="format-desc">
 This wiki is in <span id="format">${format}</span>
 </div>
 
-<a id="edit" href="${edit_url}">edit</a>
+<a id="edit" href="${edit_url}">edit page</a>
 
 <div id="wiki-content">
 ${content|n}
