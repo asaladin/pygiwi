@@ -99,11 +99,14 @@ def do_commit(request, content):
     rootfilepath = os.path.join(wikipath, page) #we want one specific file into this directory
     
     files = glob.glob(rootfilepath+".*")  #list files with any extension
+    log.debug(files)
     f = files[0]   #we take the first matching file, undertermined results if two files only differs by extension
 
     handle = open(f, "w")
     handle.write(content.encode('utf-8'))
     handle.close()
+    
+    log.debug('wrote this content: ' + content + " in file: " + f)
     
     repo = Repo(wikipath)
     strfilename = str(os.path.split(f)[1])
@@ -120,11 +123,12 @@ def do_commit(request, content):
 def edit_wiki(request):
     """this view displays the raw content of the edited file for editing
     """ 
-    
+    log.debug("calling edit_wiki")
     project = request.matchdict["project"]
     page = request.matchdict["page"]
     
     if "content" in request.POST:
+        log.debug("content in request POST" + request.POST["content"])
         do_commit(request, request.POST['content'])
         return HTTPFound(custom_route_path(request, 'view_wiki', project=project, page=page)  )
         

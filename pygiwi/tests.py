@@ -91,8 +91,8 @@ class ViewTests(unittest.TestCase):
         self.assertIn("wiki2", home_md.read())
     
     def test_edit_wiki_subdirectory(self):
-        """ test with a page in a subdir"""
-        #TODO: writeme
+        """ test with an existing page in a subdir"""
+        
         
         from .views import edit_wiki, view_wiki
         self.config.testing_securitypolicy(userid='john@doe.void',
@@ -103,7 +103,7 @@ class ViewTests(unittest.TestCase):
         
         self.request.POST['content'] = "subdir2"
         
-        self.request.matchdict['page'] = "testsubdir/subdirfile.md"
+        self.request.matchdict['page'] = "testsubdir/subdirfile"
         self.request.matchdict['project'] = self.projectname
                         
 
