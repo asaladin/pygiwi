@@ -13,7 +13,7 @@
 	This wiki page is in <span id="format">${format}</span>
     </div>
 
-    <div class="pigiwi-button">
+    <div class="pygiwi-button">
 	<a id="edit" href="${edit_url}">Edit page</a>
     </div>
 
