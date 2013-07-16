@@ -1,5 +1,7 @@
 <%inherit file="base.mako" />
 
-The page ${pagename} cannot be found <br />
+<p>The page <span class="pygiwi-pagename">${pagename}</span> cannot be found <br /></p>
 
-<a href='${url}'>Create ${pagename }</a>
+<div class="pygiwi-button">
+<a href='${url}' >Create ${pagename }</a>
+</div>

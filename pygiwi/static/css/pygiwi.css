@@ -1,0 +1,43 @@
+#wiki-content {
+       width:690px;
+       background-color:white;
+       padding-left:5px;
+       padding-right:5px;
+       border: 1px dotted grey;
+       margin:10px 15px 10px 0px;
+       }
+       
+#format {
+          background-color: #f3f3f3;
+        }
+
+        
+.pygiwi-button
+{
+    margin-top: 10px;
+    margin-bottom: 10px;
+    
+}
+
+        
+        
+.pygiwi-button a {
+          background-color: #292498;
+          color: fff;
+          border-radius: 5px;
+          padding: 4px 10px;
+          text-decoration: None;
+          font-weight: bold;
+          
+      } 
+      
+.pygiwi-button a:hover {
+    background-color: #3f36ea;
+    
+    }
+    
+#pygiwi-wiki {
+    width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+}

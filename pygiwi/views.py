@@ -85,7 +85,7 @@ def view_wiki(request):
     
     edit_url = custom_route_path(request, "edit", project=project, page=pagename)
         
-    return {"wikis": wikis, "content": html, "format": formats[ext], "edit_url": edit_url}
+    return {"wikis": wikis, "content": html, "format": formats[ext], "edit_url": edit_url, "project":project}
 
 
     
