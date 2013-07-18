@@ -191,7 +191,8 @@ def edit_wiki(request):
            return HTTPFound(custom_route_path(request, 'view_wiki', project=project, page=page) )
         except RuntimeError:
             request.session.flash("someone else seems to be edition the same file."
-                                  "we don't support concurrent editing")
+                                  "we don't support concurrent editing",
+                                  queue="error")
             content = request.POST["content"]
         
     else:

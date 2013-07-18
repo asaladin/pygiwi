@@ -10,6 +10,19 @@
 <body>
 
 
+ %for m in request.session.pop_flash('error'):
+    <div class="alert alert-error">
+       ${m}
+    </div>
+ %endfor
+
+ 
+    %for m in request.session.pop_flash():
+    <div class="alert alert-success">
+       ${m}
+    </div>
+    %endfor
+ 
 %if request.user is not None:
 <span style='float:right'>Hello ${request.user} <a href='.' id='signout'>logout</a>  </span>
 
