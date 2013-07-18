@@ -138,7 +138,10 @@ def do_commit(request):
         
         userinfos = get_user_infos(request)
         handle.write(content.encode('utf-8'))
+        
+        handle.flush()
         repo.stage([filename_relative_to_wiki])
+        log.debug("staging %s"%filename_relative_to_wiki)
         
         rep=repo.do_commit("edited online with pygiwi", committer="%(name)s <%(email)s>"%userinfos)    
         log.debug("commit anwser is: " + rep)
