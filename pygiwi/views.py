@@ -12,6 +12,7 @@ from lib import mkdir_p, custom_route_path
 import glob
 import os
 import os.path
+import fcntl  #for locking files (unix only)
 
 import logging
 log = logging.getLogger(__name__)
@@ -35,6 +36,22 @@ def getPage(request, project, pagename):
     content = open(f, "r").read()
         
     return content, ext
+
+    
+def get_last_commit_id(repo, filename):
+    #get last commit info:
+    log.debug("looking for last commit for %s"%repr(filename))
+    try:
+        walker = repo.get_walker(paths=[filename])
+        it = walker.__iter__()
+        w = it.next()
+        commit_id = w.commit.id
+        log.debug("last commit id was: %s"%commit_id)
+    except StopIteration:
+        #no first element? then this is a new file
+        log.debug("%s appears to be a new file (no last commit id found)"%filename)
+        commit_id = None
+    return commit_id
     
     
 @view_config(route_name='home', renderer='templates/mytemplate.pt')
@@ -89,9 +106,10 @@ def view_wiki(request):
 
 
     
-def do_commit(request, content):
+def do_commit(request):
     project = request.matchdict['project']
     page = request.matchdict['page']
+    content = request.POST["content"]
     
     #construction of the wiki path
     wikiroot = request.registry.settings['wiki.root']  #from settings in .ini file.
@@ -103,19 +121,36 @@ def do_commit(request, content):
     f = files[0]   #we take the first matching file, undertermined results if two files only differs by extension
 
     handle = open(f, "w")
-    handle.write(content.encode('utf-8'))
-    handle.close()
-    
-    log.debug('wrote this content: ' + content + " in file: " + f)
+    fcntl.lockf(handle, fcntl.LOCK_EX)  #acquire a file lock for the opened file
     
     repo = Repo(wikipath)
     strfilename = str(os.path.split(f)[1])
     
-    repo.stage([strfilename])
+    #filename relative to wikipath (ie subdirectory/file.wiki)
+    filename_relative_to_wiki = os.path.relpath(f, wikipath).encode("ascii")
     
-    userinfos = get_user_infos(request)
+    commit_id = get_last_commit_id(repo, filename_relative_to_wiki)
+    log.debug("last commit id is %s and post['lastcommitid'] is %s"%(commit_id, request.POST['lastcommitid']))
+    log.debug(commit_id == request.POST['lastcommitid'])
+    #is it a new file or is this file unchanged since form generation?
+    if commit_id is None or commit_id == request.POST['lastcommitid']:  
+        #no, so go on and do the commit
+        
+        userinfos = get_user_infos(request)
+        handle.write(content.encode('utf-8'))
+        repo.stage([filename_relative_to_wiki])
+        
+        rep=repo.do_commit("edited online with pygiwi", committer="%(name)s <%(email)s>"%userinfos)    
+        log.debug("commit anwser is: " + rep)
+        log.debug('wrote new content to file: %s '%f)
+    else: 
+        raise RuntimeError("file %s was changed before the commit"%f)
+        
+    handle.close()  #closing the file relases the lock
     
-    repo.do_commit("edited online with pygiwi", committer="%(name)s <%(email)s>"%userinfos)
+    
+    
+    
     
     
     
@@ -127,21 +162,40 @@ def edit_wiki(request):
     project = request.matchdict["project"]
     page = request.matchdict["page"]
     
-    if "content" in request.POST:
-        log.debug("content in request POST" + request.POST["content"])
-        do_commit(request, request.POST['content'])
-        return HTTPFound(custom_route_path(request, 'view_wiki', project=project, page=page)  )
-        
-            
+    #construction of the wiki path
+    wikiroot = request.registry.settings['wiki.root']  #from settings in .ini file.
+    wikipath = os.path.join(wikiroot, project) #project name is the name of the git repository
+    rootfilepath = os.path.join(wikipath, page) #we want one specific file into this directory
+
+    files = glob.glob(rootfilepath+".*")  #list files with any extension
+    log.debug(files)
+    f = files[0]   #we take the first matching file, undertermined results if two files only differs by extension
+
+    repo = Repo(wikipath)
+    strfilename = str(os.path.split(f)[1])
         
     #create list of wikis:
     wikiroot = request.registry.settings['wiki.root']  #from settings in .ini file.
     wikis = os.listdir(wikiroot)
     
-    content,ext = getPage(request, project, page)
-    content = unicode(content, 'utf-8')
+    f = os.path.relpath(f, wikipath).encode("ascii")
+    commit_id = get_last_commit_id(repo, f)
     
-    return {"wikis": wikis, "project": project, "content": content}
+    
+    if "content" in request.POST:
+        try:
+           do_commit(request)
+           return HTTPFound(custom_route_path(request, 'view_wiki', project=project, page=page) )
+        except RuntimeError:
+            request.session.flash("someone else seems to be edition the same file."
+                                  "we don't support concurrent editing")
+            content = request.POST["content"]
+        
+    else:
+        content,ext = getPage(request, project, page)
+        content = unicode(content, 'utf-8')
+    
+    return {"wikis": wikis, "project": project, "content": content, "commit_id": commit_id}
 
     
 @notfound_view_config(route_name="view_wiki", renderer="pygiwi:templates/wikipagenotfound.mako")
@@ -176,7 +230,8 @@ def create_wiki(request):
         dirpath = os.path.join(rootpath, dirname)
         log.debug("creating directory %s"%dirpath)
         mkdir_p(dirpath)
-        
+    
+    log.debug("creating file %s"%filepath)
     f = open(filepath, "w")
     f.write("please set some content here")
     f.close()

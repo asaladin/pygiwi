@@ -74,7 +74,11 @@ class ViewTests(unittest.TestCase):
         
         #get the last commit:
         last_commit_id = self.repo.revision_history(self.repo.head())[0].id
+        p = edit_wiki(self.request) # to retrieve the last commit id for the edited file
         
+        self.assertIn('commit_id', p)
+        
+        self.request.POST['lastcommitid'] = p['commit_id']
         self.request.POST['content'] = "wiki2"
         
         #call the edit_wiki view to modify the home page
@@ -91,7 +95,7 @@ class ViewTests(unittest.TestCase):
         self.assertIn("wiki2", home_md.read())
     
     def test_edit_wiki_subdirectory(self):
-        """ test with an existing page in a subdir"""
+        # test with an existing page in a subdir
         
         
         from .views import edit_wiki, view_wiki
@@ -100,7 +104,9 @@ class ViewTests(unittest.TestCase):
         
         #get the last commit:
         last_commit_id = self.repo.revision_history(self.repo.head())[0].id
+        p = edit_wiki(self.request) # to retrieve the last commit id for the edited file
         
+        self.request.POST['lastcommitid'] = p['commit_id']
         self.request.POST['content'] = "subdir2"
         
         self.request.matchdict['page'] = "testsubdir/subdirfile"
@@ -128,8 +134,8 @@ class ViewTests(unittest.TestCase):
     
     
     def test_edit_wiki_noUpdate(self):
-        """test the edit wiki view but with a "get" request, ie no modification performed, just
-        display the editor"""
+        # test the edit wiki view but with a "get" request, ie no modification performed, just
+        # display the editor
         
         from .views import edit_wiki, view_wiki
         self.config.testing_securitypolicy(userid='john@doe.void',
@@ -142,7 +148,7 @@ class ViewTests(unittest.TestCase):
     
     
     def test_wiki_home(self):
-        """test the wiki_home view that basically lists all available wikis"""
+        # test the wiki_home view that basically lists all available wikis
         from .views import wiki_home
         
         #create a new empty request:
@@ -151,3 +157,37 @@ class ViewTests(unittest.TestCase):
         
         wh = wiki_home(self.request)
         self.assertIn(self.projectname, wh["wikis"])
+        
+        
+    def test_concurrent_edition(self):
+        # test concurrent editing: an error should be displayed when the same page (same revision) is modified twice
+        
+        from .views import edit_wiki
+        
+        p = edit_wiki(self.request)
+        
+        commit_id = p['commit_id']
+        self.request.POST['lastcommitid'] = commit_id
+        self.request.POST['content'] = "editing version 2"
+        # we are using the homepage by default
+        
+        
+        p = edit_wiki(self.request)
+        
+        #open the Home page and check that 'version 2' is there... 
+        f = open("%s/%s"%(self.tmpdir, "Home.md"), "r")
+        filecontent = f.read()
+        self.assertIn("version 2", filecontent)       
+        
+        #set a new post content but leave the lastcommitid unchanged
+        self.request.POST['content'] = "editing version 3"
+        p = edit_wiki(self.request)
+         
+        #open the Home page and check that 'version 3' is not there... 
+        f = open("%s/%s"%(self.tmpdir, "Home.md"), "r")
+        filecontent = f.read()
+        self.assertNotIn("version 3", filecontent)
+        
+        
+        
+        
