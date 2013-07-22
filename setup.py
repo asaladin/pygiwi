@@ -12,6 +12,8 @@ requires = [
     'waitress',
     'dulwich',
     'pyramid_persona',
+    'markdown',
+    'python-creole',
     ]
 
 setup(name='pygiwi',
