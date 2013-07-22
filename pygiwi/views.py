@@ -56,7 +56,8 @@ def get_last_commit_id(repo, filename):
     
 @view_config(route_name='home', renderer='templates/mytemplate.pt')
 def my_view(request):
-    return {'project': 'pygiwi'}
+    return HTTPFound(request.route_url('wiki_home'))
+    
 
     
 @view_config(route_name="wiki_project_home")
