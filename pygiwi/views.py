@@ -7,6 +7,7 @@ from pyramid.security import authenticated_userid
 from dulwich.repo import Repo
 
 from lib import renderers, formats, get_user_infos
+from lib import markdown_renderer
 from lib import mkdir_p, custom_route_path
 
 import glob
@@ -247,3 +248,10 @@ def create_wiki(request):
     f.close()
     
     return HTTPFound(custom_route_path(request, "edit", project=project, page=page))
+
+    
+@view_config(route_name="preview")    
+def preview(request):
+    data = request.POST['data']
+    return Response(markdown_renderer(data))
+    

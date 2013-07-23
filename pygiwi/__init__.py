@@ -28,6 +28,8 @@ def main(global_config, **settings):
     
     config.add_route("edit", "/edit/{project}/{page:.*}")
     config.add_route("createpage", "/createpage/{project}/{page:.*}")
+    config.add_route("preview", "/preview")
+    
     
     config.add_view(".views.forbidden", context=pyramid.exceptions.Forbidden, renderer="pygiwi:templates/forbidden.mako")
     
