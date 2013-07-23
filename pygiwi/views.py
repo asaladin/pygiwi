@@ -56,7 +56,7 @@ def get_last_commit_id(repo, filename):
     
 @view_config(route_name='home', renderer='templates/mytemplate.pt')
 def my_view(request):
-    return HTTPFound(request.route_url('wiki_home'))
+    return HTTPFound(request.route_path('wiki_home'))
     
 
     
@@ -65,7 +65,7 @@ def wiki_project_home(request):
     """this view is called with urls like /wiki/project_name without page name. It should redirect to the 'home' page,
        ie Home"""
     project_name = request.matchdict['project']
-    return HTTPFound(request.route_url('view_wiki', project=project_name, page='Home'))
+    return HTTPFound(request.route_path('view_wiki', project=project_name, page='Home'))
     
 
 @view_config(route_name='wiki_home2', renderer='pygiwi:templates/wiki_home.mako')    
@@ -87,7 +87,7 @@ def view_wiki(request):
     project = request.matchdict["project"]
     
     if pagename=='':
-        return HTTPFound(request.route_url('view_wiki', project=project, page='Home'))
+        return HTTPFound(request.route_path('view_wiki', project=project, page='Home'))
     
     try:
         content, ext = getPage(request, project, pagename)
