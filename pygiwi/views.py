@@ -250,7 +250,7 @@ def create_wiki(request):
     return HTTPFound(custom_route_path(request, "edit", project=project, page=page))
 
     
-@view_config(route_name="preview")    
+@view_config(route_name="preview", permission="edit")    
 def preview(request):
     data = request.POST['data']
     return Response(markdown_renderer(data))
