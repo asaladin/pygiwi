@@ -53,6 +53,11 @@ def get_last_commit_id(repo, filename):
         commit_id = None
     return commit_id
     
+
+    
+def forbidden(request):
+    return {}
+    
     
 @view_config(route_name='home', renderer='templates/mytemplate.pt')
 def my_view(request):

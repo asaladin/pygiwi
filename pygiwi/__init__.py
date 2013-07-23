@@ -1,6 +1,8 @@
 from pyramid.config import Configurator
 from pyramid.httpexceptions import HTTPFound
 
+import pyramid.exceptions
+
 from pyramid.events import subscriber
 from pyramid.events import NewRequest
 
@@ -26,6 +28,8 @@ def main(global_config, **settings):
     
     config.add_route("edit", "/edit/{project}/{page:.*}")
     config.add_route("createpage", "/createpage/{project}/{page:.*}")
+    
+    config.add_view(".views.forbidden", context=pyramid.exceptions.Forbidden, renderer="pygiwi:templates/forbidden.mako")
     
     
     config.scan()
