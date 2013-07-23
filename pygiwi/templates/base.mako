@@ -6,6 +6,10 @@
 <script src="https://login.persona.org/include.js" type="text/javascript"></script>
 <script type="text/javascript">${request.persona_js}</script>
 
+<%block name="header">
+</%block>
+
+
 </head>
 <body>
 
@@ -36,3 +40,4 @@ ${next.body()}
 
 </body>
 </html>
+
