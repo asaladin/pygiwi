@@ -60,7 +60,7 @@ def forbidden(request):
     return {}
     
     
-@view_config(route_name='home', renderer='templates/mytemplate.pt')
+@view_config(route_name='home')
 def my_view(request):
     return HTTPFound(request.route_path('wiki_home'))
     
