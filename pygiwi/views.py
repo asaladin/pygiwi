@@ -223,7 +223,7 @@ def wiki_not_found_view(exc, request):
     
     
 @view_config(route_name="createpage", permission="edit")
-def create_wiki(request):
+def wiki_create_page(request):
     
     project = request.matchdict['project']
     page = request.matchdict['page']

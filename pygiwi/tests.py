@@ -114,8 +114,8 @@ class ViewTests(unittest.TestCase):
                         
 
         #create the subdir file:
-        from .views import create_wiki
-        create_wiki(self.request)
+        from .views import wiki_create_page
+        wiki_create_page(self.request)
                         
         #call the edit_wiki view to modify the home page
         p = edit_wiki(self.request)    
