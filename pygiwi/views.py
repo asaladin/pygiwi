@@ -26,8 +26,6 @@ def getPage(request, project, pagename):
     Note: the 'pagename' can actually contain a file path, since pages can be located in subdirectories.
     """
     
-    log.debug("pagename: %s"%pagename)
-    
     #check for inappropriate path for 'pagename':
     if '..' in pagename:
         raise RuntimeError("possible attempt to see pages outside the taget directory")
