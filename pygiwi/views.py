@@ -23,7 +23,14 @@ def getPage(request, project, pagename):
     """
     this function takes the request object (for configuration values in registry), the project name and the pagename and  
     returns the corresponding file content
+    Note: the 'pagename' can actually contain a file path, since pages can be located in subdirectories.
     """
+    
+    log.debug("pagename: %s"%pagename)
+    
+    #check for inappropriate path for 'pagename':
+    if '..' in pagename:
+        raise RuntimeError("possible attempt to see pages outside the taget directory")
     
     #construction of the wiki path
     wikiroot = request.registry.settings['wiki.root']  #from settings in .ini file.
@@ -97,7 +104,9 @@ def view_wiki(request):
     
     try:
         content, ext = getPage(request, project, pagename)
-    except:
+    except RuntimeError:
+        raise  #url contained unauthorized pattern (ie '../')
+    except:  #the page could not be found
         mydict = dict(pagename = pagename, url="/createwiki/%s/%s"%(project, pagename) )
         raise HTTPNotFound()
     
